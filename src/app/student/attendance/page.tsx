@@ -12,21 +12,22 @@ import { getSession } from '@/lib/auth';
 import type { Student } from '@/lib/types';
 import { useEffect } from 'react';
 
-export default function StudentAttendancePage() {
-  const [month, setMonth] = useState<Date>(new Date());
-  const [attendance, setAttendance] = useState<StudentAttendance>({});
-  const [user, setUser] = useState<Student | null>(null);
+type StudentAttendancePageProps = {
+  initialAttendance: StudentAttendance;
+  user: Student;
+};
 
+
+function StudentAttendanceContent({ initialAttendance, user }: StudentAttendancePageProps) {
+  const [month, setMonth] = useState<Date>(new Date());
+  const [attendance, setAttendance] = useState<StudentAttendance>(initialAttendance);
+  
   useEffect(() => {
-    async function fetchUser() {
-      const { user } = await getSession();
-      if (user && user.role === 'student') {
-        setUser(user);
-        setAttendance(getStudentAttendance(user.id));
-      }
-    }
-    fetchUser();
-  }, []);
+    // If you need to refetch attendance for some reason, you can do it here.
+    // For now, we are using the server-fetched initial data.
+    setAttendance(initialAttendance);
+  }, [initialAttendance]);
+
 
   const presentDays: Date[] = [];
   const absentDays: Date[] = [];
@@ -34,6 +35,8 @@ export default function StudentAttendancePage() {
 
   Object.entries(attendance).forEach(([date, status]) => {
     const d = new Date(date);
+    // Add timezone offset to avoid date shifting issues
+    d.setMinutes(d.getMinutes() + d.getTimezoneOffset());
     if (d.toDateString() !== 'Invalid Date') {
         if (status === 'present') presentDays.push(d);
         else if (status === 'absent') absentDays.push(d);
@@ -41,12 +44,9 @@ export default function StudentAttendancePage() {
     }
   });
   
-  const totalAttended = presentDays.length + absentDays.length;
-  const presentPercentage = totalAttended > 0 ? Math.round((presentDays.length / totalAttended) * 100) : 0;
-
-  if (!user) {
-    return <div>Loading...</div>;
-  }
+  const attendedDays = presentDays.length;
+  const totalDays = presentDays.length + absentDays.length;
+  const presentPercentage = totalDays > 0 ? Math.round((attendedDays / totalDays) * 100) : 0;
 
   return (
     <div className="space-y-6">
@@ -150,4 +150,17 @@ export default function StudentAttendancePage() {
         </div>
     </div>
   );
+}
+
+export default async function StudentAttendancePage() {
+    const { user } = await getSession();
+    
+    if (!user || user.role !== 'student') {
+        // This case should be handled by the layout's protectPage, but as a fallback
+        return <div>You are not authorized to view this page.</div>;
+    }
+
+    const attendance = getStudentAttendance(user.id);
+
+    return <StudentAttendanceContent initialAttendance={attendance} user={user} />;
 }
