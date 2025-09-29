@@ -80,3 +80,16 @@ export function saveAttendance(date: string, studentId: string, status: 'present
     // For now, we'll just update a single student's record. This will affect all students viewing attendance.
     attendanceData[date] = status;
 }
+
+export function addStudent(studentData: Omit<Student, 'id' | 'role' | 'avatarUrl'>) {
+    const newId = `stu${(students.length + 1).toString().padStart(3, '0')}`;
+    const newStudent: Student = {
+        ...studentData,
+        id: newId,
+        role: 'student',
+        avatarUrl: `https://picsum.photos/seed/${newId}/100/100`
+    };
+    students.push(newStudent);
+    users.push(newStudent);
+    return newStudent;
+}

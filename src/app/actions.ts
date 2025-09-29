@@ -2,7 +2,7 @@
 
 import { generateStudentDatabaseInsights } from '@/ai/flows/generate-student-database-insights';
 import { suggestDashboardActions } from '@/ai/flows/suggest-dashboard-actions';
-import { addNote, saveAttendance, type Note } from '@/lib/db';
+import { addNote, addStudent, saveAttendance, type Note, type Student } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 
 export async function getDashboardSuggestions(dashboardData: string) {
@@ -46,5 +46,16 @@ export async function submitAttendance(date: string, attendance: { [studentId: s
     } catch (error) {
         console.error(error);
         return { success: false, error: 'Failed to submit attendance.' };
+    }
+}
+
+export async function createStudent(studentData: Omit<Student, 'id' | 'role' | 'avatarUrl'>) {
+    try {
+        addStudent(studentData);
+        revalidatePath('/admin/students');
+        return { success: true };
+    } catch (error) {
+        console.error(error);
+        return { success: false, error: 'Failed to add student.' };
     }
 }
