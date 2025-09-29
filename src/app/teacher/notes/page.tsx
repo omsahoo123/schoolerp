@@ -11,28 +11,54 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Upload } from 'lucide-react';
+import { addContent } from '@/app/actions';
+import { useRouter } from 'next/navigation';
 
 const contentSchema = z.object({
   title: z.string().min(3, 'Title is too short'),
-  contentType: z.string(),
-  class: z.string(),
-  section: z.string(),
+  contentType: z.string({ required_error: 'Please select a content type.' }),
+  class: z.string({ required_error: 'Please select a class.' }),
+  section: z.string({ required_error: 'Please select a section.' }),
   description: z.string().optional(),
+  subject: z.string().min(2, 'Subject is too short'),
 });
 
 export default function AddContentPage() {
   const { toast } = useToast();
+  const router = useRouter();
   const form = useForm<z.infer<typeof contentSchema>>({
     resolver: zodResolver(contentSchema),
-    defaultValues: {},
+    defaultValues: {
+      title: '',
+      description: '',
+      subject: '',
+    },
   });
 
-  const onSubmit = (values: z.infer<typeof contentSchema>) => {
-    toast({
-      title: 'Content Added',
-      description: `${values.contentType} "${values.title}" has been shared with the class.`,
+  const onSubmit = async (values: z.infer<typeof contentSchema>) => {
+    const result = await addContent({
+      title: values.title,
+      type: values.contentType,
+      class: values.class,
+      section: values.section,
+      description: values.description,
+      subject: values.subject,
     });
-    form.reset();
+    
+    if (result.success) {
+      toast({
+        title: 'Content Added',
+        description: `${values.contentType} "${values.title}" has been shared with the class.`,
+      });
+      form.reset();
+      router.refresh();
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: result.error,
+      });
+    }
   };
 
   return (
@@ -52,6 +78,19 @@ export default function AddContentPage() {
                   <FormLabel>Title</FormLabel>
                   <FormControl>
                     <Input placeholder="e.g., Chapter 5: Thermodynamics" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="subject"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Subject</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., Physics" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -91,6 +130,8 @@ export default function AddContentPage() {
                       <SelectContent>
                         <SelectItem value="Computer Science">Computer Science</SelectItem>
                         <SelectItem value="Physics">Physics</SelectItem>
+                        <SelectItem value="Mathematics">Mathematics</SelectItem>
+                        <SelectItem value="Chemistry">Chemistry</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -110,6 +151,7 @@ export default function AddContentPage() {
                       <SelectContent>
                         <SelectItem value="A">A</SelectItem>
                         <SelectItem value="B">B</SelectItem>
+                        <SelectItem value="C">C</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -133,6 +175,7 @@ export default function AddContentPage() {
             <div className="p-6 border-2 border-dashed rounded-lg text-center cursor-pointer hover:border-primary transition-colors">
                 <Upload className="mx-auto h-10 w-10 text-muted-foreground"/>
                 <p className="mt-2 text-sm text-muted-foreground">Click or drag file to this area to upload</p>
+                <Input type="file" className="sr-only" />
             </div>
             <Button type="submit" className="w-full">
               Add Content

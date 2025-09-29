@@ -1,3 +1,6 @@
+// This file is deprecated. Please use src/lib/db.ts instead.
+// The contents are kept to prevent breaking existing imports, but will be removed in a future update.
+
 import type { Student, Teacher, Admin, AuthenticatedUser } from './types';
 
 export const admins: Admin[] = [

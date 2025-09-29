@@ -2,18 +2,20 @@
 
 import { useState } from 'react';
 import { format } from 'date-fns';
+import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { students } from '@/lib/data';
+import { students } from '@/lib/db';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getInitials } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import { submitAttendance } from '@/app/actions';
 
 type AttendanceStatus = { [studentId: string]: 'present' | 'absent' };
 
@@ -23,6 +25,7 @@ export default function AttendancePage() {
   const [selectedSection, setSelectedSection] = useState('');
   const [attendance, setAttendance] = useState<AttendanceStatus>({});
   const { toast } = useToast();
+  const router = useRouter();
 
   const handleMarkAll = (status: 'present' | 'absent') => {
     if (!date) {
@@ -53,21 +56,27 @@ export default function AttendancePage() {
 
   const filteredStudents = students.filter(student => student.course === selectedClass && student.section === selectedSection);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!date) {
         toast({ variant: 'destructive', title: 'Error', description: 'Please select a date.' });
         return;
     }
-    console.log({
-        date: format(date, 'yyyy-MM-dd'),
-        class: selectedClass,
-        section: selectedSection,
-        attendance,
-    });
-    toast({
-        title: 'Attendance Submitted',
-        description: 'The attendance record has been saved successfully.',
-    })
+    
+    const result = await submitAttendance(format(date, 'yyyy-MM-dd'), attendance);
+
+    if (result.success) {
+      toast({
+          title: 'Attendance Submitted',
+          description: 'The attendance record has been saved successfully.',
+      });
+      router.refresh();
+    } else {
+       toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: result.error,
+       });
+    }
   }
 
   return (

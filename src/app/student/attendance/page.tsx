@@ -5,7 +5,7 @@ import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { attendanceData } from '@/lib/data';
+import { attendanceData } from '@/lib/db';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 

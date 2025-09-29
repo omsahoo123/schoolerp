@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { BrainCircuit, Loader, Search, UserPlus } from 'lucide-react';
-import { students } from '@/lib/data';
+import { students } from '@/lib/db';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';

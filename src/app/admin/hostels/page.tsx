@@ -3,7 +3,7 @@
 import { Hotel, BedDouble, Users } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { hostelData } from '@/lib/data';
+import { hostelData } from '@/lib/db';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 export default function HostelsPage() {

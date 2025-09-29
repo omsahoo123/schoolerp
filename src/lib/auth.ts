@@ -2,7 +2,7 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { users } from '@/lib/data';
+import { users } from '@/lib/db';
 import type { AuthenticatedUser, UserRole } from './types';
 
 const FAKE_PASSWORD = 'password123';

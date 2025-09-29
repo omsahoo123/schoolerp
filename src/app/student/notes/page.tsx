@@ -2,15 +2,23 @@ import { Book, Download, FileText, Type } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { notes } from '@/lib/db';
+import { getSession } from '@/lib/auth';
+import type { Student } from '@/lib/types';
+import { File } from 'lucide-react';
 
-const notesData = [
-  { id: 1, title: 'Chapter 1: Introduction to Algorithms', type: 'Notes', subject: 'Computer Science', date: '2024-07-10', icon: FileText },
-  { id: 2, title: 'Quantum Mechanics Problem Set', type: 'Homework', subject: 'Physics', date: '2024-07-12', icon: Type },
-  { id: 3, title: 'Calculus II Review Sheet', type: 'Notes', subject: 'Mathematics', date: '2024-07-15', icon: FileText },
-  { id: 4, title: 'Lab Report: Titration Experiment', type: 'Homework', subject: 'Chemistry', date: '2024-07-18', icon: Type },
-];
+const iconMap = {
+  Notes: FileText,
+  Homework: Type,
+  Test: File,
+}
 
-export default function StudentNotesPage() {
+export default async function StudentNotesPage() {
+  const { user } = await getSession();
+  const student = user as Student;
+
+  const filteredNotes = notes.filter(note => note.class === student.course && note.section === student.section);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
@@ -23,10 +31,12 @@ export default function StudentNotesPage() {
       <Card>
         <CardContent className="pt-6">
           <div className="space-y-4">
-            {notesData.map((note) => (
+            {filteredNotes.length > 0 ? filteredNotes.map((note) => {
+              const Icon = iconMap[note.type as keyof typeof iconMap] || FileText;
+              return (
               <div key={note.id} className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-lg hover:bg-secondary/50 transition-colors">
                 <div className="flex items-center gap-4">
-                  <note.icon className="h-8 w-8 text-muted-foreground" />
+                  <Icon className="h-8 w-8 text-muted-foreground" />
                   <div>
                     <p className="font-semibold">{note.title}</p>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -43,7 +53,9 @@ export default function StudentNotesPage() {
                   <span className="sr-only">Download</span>
                 </Button>
               </div>
-            ))}
+            )}) : (
+              <p className="text-center text-muted-foreground py-8">No notes or homework found for your class.</p>
+            )}
           </div>
         </CardContent>
       </Card>

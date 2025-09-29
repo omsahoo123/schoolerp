@@ -2,6 +2,8 @@
 
 import { generateStudentDatabaseInsights } from '@/ai/flows/generate-student-database-insights';
 import { suggestDashboardActions } from '@/ai/flows/suggest-dashboard-actions';
+import { addNote, saveAttendance, type Note } from '@/lib/db';
+import { revalidatePath } from 'next/cache';
 
 export async function getDashboardSuggestions(dashboardData: string) {
   try {
@@ -21,4 +23,28 @@ export async function getStudentDbInsights(databaseSummary: string) {
       console.error(error);
       return { success: false, error: 'Failed to generate insights.' };
     }
-  }
+}
+
+export async function addContent(note: Omit<Note, 'id' | 'date'>) {
+    try {
+        addNote(note);
+        revalidatePath('/student/notes');
+        return { success: true };
+    } catch (error) {
+        console.error(error);
+        return { success: false, error: 'Failed to add content.' };
+    }
+}
+
+export async function submitAttendance(date: string, attendance: { [studentId: string]: 'present' | 'absent' }) {
+    try {
+        Object.entries(attendance).forEach(([studentId, status]) => {
+            saveAttendance(date, studentId, status);
+        });
+        revalidatePath('/student/attendance');
+        return { success: true };
+    } catch (error) {
+        console.error(error);
+        return { success: false, error: 'Failed to submit attendance.' };
+    }
+}
