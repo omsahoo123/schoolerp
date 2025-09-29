@@ -6,6 +6,7 @@ import { notes } from '@/lib/db';
 import { getSession } from '@/lib/auth';
 import type { Student } from '@/lib/types';
 import Link from 'next/link';
+import { protectPage } from '@/lib/auth';
 
 const iconMap = {
   Notes: FileText,
@@ -19,7 +20,7 @@ const iconMap = {
 }
 
 export default async function StudentNotesPage() {
-  const { user } = await getSession();
+  const user = await protectPage('student');
 
   if (!user || user.role !== 'student') {
     // Or redirect, or show an error message

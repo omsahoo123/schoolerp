@@ -114,6 +114,7 @@ export default function AddContentPage() {
                         <SelectItem value="Homework">Homework</SelectItem>
                         <SelectItem value="Notes">Notes</SelectItem>
                         <SelectItem value="Test">Test</SelectItem>
+                        <SelectItem value="PDF">PDF</SelectItem>
                         <SelectItem value="YouTube Link">YouTube Link</SelectItem>
                         <SelectItem value="Zoom Link">Zoom Link</SelectItem>
                         <SelectItem value="Google Form">Google Form</SelectItem>
