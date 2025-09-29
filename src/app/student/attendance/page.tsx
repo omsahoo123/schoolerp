@@ -1,16 +1,20 @@
-'use client';
+'use server';
 
 import { useState } from 'react';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { attendanceData } from '@/lib/data';
+import { getStudentAttendance } from '@/lib/db';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { getSession } from '@/lib/auth';
+import type { Student } from '@/lib/types';
 
-export default function StudentAttendancePage() {
-  const [month, setMonth] = useState<Date>(new Date());
+export default async function StudentAttendancePage() {
+  const { user } = await getSession();
+  const student = user as Student;
+  const attendanceData = getStudentAttendance(student.id);
 
   const presentDays: Date[] = [];
   const absentDays: Date[] = [];
@@ -37,8 +41,7 @@ export default function StudentAttendancePage() {
                 </CardHeader>
                 <CardContent className="flex justify-center">
                     <DayPicker
-                        month={month}
-                        onMonthChange={setMonth}
+                        month={new Date()}
                         mode="multiple"
                         min={0}
                         selected={[...presentDays, ...absentDays, ...holidayDays]}
