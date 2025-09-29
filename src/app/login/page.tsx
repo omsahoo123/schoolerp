@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useFormState, useFormStatus } from 'react-dom';
-import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,12 +19,10 @@ import Link from 'next/link';
 type State = {
   success: boolean;
   message: string;
-  role?: UserRole;
 } | undefined;
 
 export default function LoginPage() {
   const { toast } = useToast();
-  const router = useRouter();
   
   const [role, setRole] = useState<UserRole | ''>('');
   
@@ -37,16 +34,9 @@ export default function LoginPage() {
     const password = formData.get('password') as string;
 
     const result = await signIn(role, userId, password);
-    if (result.success) {
-      toast({
-        title: 'Login Successful',
-        description: `Welcome back, ${result.user.name}!`,
-      });
-      router.push(`/${result.user.role}/dashboard`);
-      return { success: true, message: 'Login successful', role: result.user.role };
-    } else {
-      return { success: false, message: result.message };
-    }
+    // Because signIn now redirects, the client won't receive the successful result.
+    // We only need to handle the failure case here.
+    return result;
   };
 
   const [state, formAction] = useFormState(signInWithRole, undefined);
@@ -83,7 +73,7 @@ export default function LoginPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
-                <Input id="password" name="password" type="password" required defaultValue="password123"/>
+                <Input id="password" name="password" type="password" required />
               </div>
               
               {state && !state.success && (

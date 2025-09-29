@@ -23,6 +23,10 @@ export async function signIn(role: UserRole, userId: string, password?: string) 
     path: '/',
   });
   
+  // This will now handle the redirection on the server side.
+  redirect(`/${user.role}/dashboard`);
+
+  // This part is effectively unreachable but kept for type consistency if redirect doesn't happen
   return { success: true, user };
 }
 
