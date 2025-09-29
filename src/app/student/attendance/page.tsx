@@ -1,14 +1,12 @@
 'use server';
 
-import { DayPicker } from 'react-day-picker';
-import 'react-day-picker/dist/style.css';
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { getStudentAttendance } from '@/lib/db';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { getSession } from '@/lib/auth';
 import type { Student } from '@/lib/types';
+import { AttendanceCalendar } from './AttendanceCalendar';
 
 export default async function StudentAttendancePage() {
   const { user } = await getSession();
@@ -20,9 +18,11 @@ export default async function StudentAttendancePage() {
   const holidayDays: Date[] = [];
 
   Object.entries(attendanceData).forEach(([date, status]) => {
-    if (status === 'present') presentDays.push(new Date(date));
-    else if (status === 'absent') absentDays.push(new Date(date));
-    else if (status === 'holiday') holidayDays.push(new Date(date));
+    const d = new Date(date);
+    d.setMinutes(d.getMinutes() + d.getTimezoneOffset()); // Adjust for timezone issues
+    if (status === 'present') presentDays.push(d);
+    else if (status === 'absent') absentDays.push(d);
+    else if (status === 'holiday') holidayDays.push(d);
   });
 
   const attendedDays = presentDays.length;
@@ -39,27 +39,7 @@ export default async function StudentAttendancePage() {
                 <CardDescription>Your attendance record for the selected month.</CardDescription>
                 </CardHeader>
                 <CardContent className="flex justify-center">
-                    <DayPicker
-                        month={new Date()}
-                        mode="multiple"
-                        min={0}
-                        selected={[...presentDays, ...absentDays, ...holidayDays]}
-                        modifiers={{
-                            present: presentDays,
-                            absent: absentDays,
-                            holiday: holidayDays,
-                        }}
-                        modifiersClassNames={{
-                            present: 'day-present',
-                            absent: 'day-absent',
-                            holiday: 'day-holiday',
-                        }}
-                    />
-                    <style>{`
-                        .day-present { background-color: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
-                        .day-absent { background-color: hsl(var(--destructive)); color: hsl(var(--destructive-foreground)); }
-                        .day-holiday { background-color: hsl(var(--muted)); color: hsl(var(--muted-foreground)); }
-                    `}</style>
+                   <AttendanceCalendar presentDays={presentDays} absentDays={absentDays} holidayDays={holidayDays} />
                 </CardContent>
             </Card>
 
