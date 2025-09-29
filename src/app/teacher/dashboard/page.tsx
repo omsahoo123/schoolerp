@@ -1,8 +1,20 @@
-import { CalendarCheck, Users, Notebook, Video, PlusCircle } from 'lucide-react';
+'use client';
+
+import { useState } from 'react';
+import { CalendarCheck, Users, Notebook, Video, PlusCircle, Loader, UserPlus } from 'lucide-react';
 import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { createStudent } from '@/app/actions';
 
 const dashboardCards = [
   {
@@ -35,7 +47,45 @@ const dashboardCards = [
   },
 ];
 
+const studentSchema = z.object({
+    name: z.string().min(2, "Name must be at least 2 characters."),
+    email: z.string().email("Invalid email address."),
+    course: z.string({ required_error: 'Please select a course.' }),
+    year: z.coerce.number().min(1).max(5),
+    section: z.string({ required_error: 'Please select a section.' }),
+});
+
 export default function TeacherDashboard() {
+  const [addStudentOpen, setAddStudentOpen] = useState(false);
+  const { toast } = useToast();
+
+  const form = useForm<z.infer<typeof studentSchema>>({
+    resolver: zodResolver(studentSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      year: 1,
+    },
+  });
+  
+  const onAddStudentSubmit = async (values: z.infer<typeof studentSchema>) => {
+      const result = await createStudent(values);
+      if (result.success) {
+          toast({
+              title: 'Student Added',
+              description: `${values.name} has been added to the database.`,
+          });
+          form.reset();
+          setAddStudentOpen(false);
+      } else {
+          toast({
+              variant: 'destructive',
+              title: 'Error',
+              description: result.error,
+          });
+      }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-start">
@@ -43,10 +93,84 @@ export default function TeacherDashboard() {
           <h1 className="text-3xl font-bold font-headline">Teacher Dashboard</h1>
           <p className="text-muted-foreground">Your central hub for managing classes and students.</p>
         </div>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Create Student ID
-        </Button>
+        <Dialog open={addStudentOpen} onOpenChange={setAddStudentOpen}>
+            <DialogTrigger asChild>
+                <Button>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Create Student ID
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-lg">
+                <DialogHeader>
+                    <DialogTitle>Add New Student</DialogTitle>
+                    <DialogDescription>
+                        Fill in the details to add a new student to the database.
+                    </DialogDescription>
+                </DialogHeader>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onAddStudentSubmit)} className="space-y-4 py-4">
+                        <FormField control={form.control} name="name" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Full Name</FormLabel>
+                                <FormControl><Input placeholder="John Doe" {...field} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}/>
+                        <FormField control={form.control} name="email" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Email</FormLabel>
+                                <FormControl><Input placeholder="john.doe@example.com" {...field} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}/>
+                        <div className='grid grid-cols-3 gap-4'>
+                        <FormField control={form.control} name="course" render={({ field }) => (
+                            <FormItem className='col-span-2'>
+                                <FormLabel>Course</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl><SelectTrigger><SelectValue placeholder="Select course..." /></SelectTrigger></FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="Computer Science">Computer Science</SelectItem>
+                                        <SelectItem value="Physics">Physics</SelectItem>
+                                        <SelectItem value="Mathematics">Mathematics</SelectItem>
+                                        <SelectItem value="Chemistry">Chemistry</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}/>
+                        <FormField control={form.control} name="year" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Year</FormLabel>
+                                <FormControl><Input type="number" {...field} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}/>
+                        </div>
+                        <FormField control={form.control} name="section" render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Section</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl><SelectTrigger><SelectValue placeholder="Select section..." /></SelectTrigger></FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="A">A</SelectItem>
+                                        <SelectItem value="B">B</SelectItem>
+                                        <SelectItem value="C">C</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}/>
+                        <DialogFooter>
+                            <Button type="submit" disabled={form.formState.isSubmitting}>
+                                {form.formState.isSubmitting && <Loader className="mr-2 h-4 w-4 animate-spin" />}
+                                Add Student
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </Form>
+            </DialogContent>
+        </Dialog>
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-2">
