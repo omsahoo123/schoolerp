@@ -33,8 +33,10 @@ type Insights = {
 } | null;
 
 const studentSchema = z.object({
+    id: z.string().min(3, "Student ID must be at least 3 characters."),
     name: z.string().min(2, "Name must be at least 2 characters."),
     email: z.string().email("Invalid email address."),
+    password: z.string().min(8, "Password must be at least 8 characters."),
     course: z.string({ required_error: 'Please select a course.' }),
     year: z.coerce.number().min(1).max(5),
     section: z.string({ required_error: 'Please select a section.' }),
@@ -53,6 +55,8 @@ export default function StudentsPage() {
       name: '',
       email: '',
       year: 1,
+      id: `stu${(students.length + 1).toString().padStart(3, '0')}`,
+      password: 'password123',
     },
   });
 
@@ -87,7 +91,13 @@ export default function StudentsPage() {
               title: 'Student Added',
               description: `${values.name} has been added to the database.`,
           });
-          form.reset();
+          form.reset({
+            name: '',
+            email: '',
+            year: 1,
+            id: `stu${(students.length + 1).toString().padStart(3, '0')}`,
+            password: 'password123',
+          });
           setAddStudentOpen(false);
       } else {
           toast({
@@ -174,6 +184,22 @@ export default function StudentsPage() {
                                         <FormMessage />
                                     </FormItem>
                                 )}/>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <FormField control={form.control} name="id" render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Student ID</FormLabel>
+                                            <FormControl><Input placeholder="stu006" {...field} /></FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}/>
+                                    <FormField control={form.control} name="password" render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Password</FormLabel>
+                                            <FormControl><Input type="password" {...field} /></FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}/>
+                                </div>
                                 <div className='grid grid-cols-3 gap-4'>
                                 <FormField control={form.control} name="course" render={({ field }) => (
                                     <FormItem className='col-span-2'>
@@ -265,3 +291,5 @@ export default function StudentsPage() {
     </Card>
   );
 }
+
+    

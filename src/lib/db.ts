@@ -81,15 +81,15 @@ export function saveAttendance(date: string, studentId: string, status: 'present
     attendanceData[date] = status;
 }
 
-export function addStudent(studentData: Omit<Student, 'id' | 'role' | 'avatarUrl'>) {
-    const newId = `stu${(students.length + 1).toString().padStart(3, '0')}`;
+export function addStudent(studentData: Omit<Student, 'role' | 'avatarUrl'>) {
     const newStudent: Student = {
         ...studentData,
-        id: newId,
         role: 'student',
-        avatarUrl: `https://picsum.photos/seed/${newId}/100/100`
+        avatarUrl: `https://picsum.photos/seed/${studentData.id}/100/100`
     };
     students.push(newStudent);
     users.push(newStudent);
     return newStudent;
 }
+
+    

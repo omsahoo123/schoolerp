@@ -49,13 +49,16 @@ export async function submitAttendance(date: string, attendance: { [studentId: s
     }
 }
 
-export async function createStudent(studentData: Omit<Student, 'id' | 'role' | 'avatarUrl'>) {
+export async function createStudent(studentData: Omit<Student, 'role' | 'avatarUrl'>) {
     try {
         addStudent(studentData);
         revalidatePath('/admin/students');
+        revalidatePath('/teacher/dashboard');
         return { success: true };
     } catch (error) {
         console.error(error);
         return { success: false, error: 'Failed to add student.' };
     }
 }
+
+    

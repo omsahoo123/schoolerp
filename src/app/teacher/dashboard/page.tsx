@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CalendarCheck, Users, Notebook, Video, PlusCircle, Loader, UserPlus } from 'lucide-react';
+import { CalendarCheck, Users, Notebook, Video, PlusCircle, Loader } from 'lucide-react';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { createStudent } from '@/app/actions';
+import { students } from '@/lib/db';
 
 const dashboardCards = [
   {
@@ -48,8 +49,10 @@ const dashboardCards = [
 ];
 
 const studentSchema = z.object({
+    id: z.string().min(3, "Student ID must be at least 3 characters."),
     name: z.string().min(2, "Name must be at least 2 characters."),
     email: z.string().email("Invalid email address."),
+    password: z.string().min(8, "Password must be at least 8 characters."),
     course: z.string({ required_error: 'Please select a course.' }),
     year: z.coerce.number().min(1).max(5),
     section: z.string({ required_error: 'Please select a section.' }),
@@ -65,6 +68,8 @@ export default function TeacherDashboard() {
       name: '',
       email: '',
       year: 1,
+      id: `stu${(students.length + 1).toString().padStart(3, '0')}`,
+      password: 'password123',
     },
   });
   
@@ -75,7 +80,13 @@ export default function TeacherDashboard() {
               title: 'Student Added',
               description: `${values.name} has been added to the database.`,
           });
-          form.reset();
+          form.reset({
+            name: '',
+            email: '',
+            year: 1,
+            id: `stu${(students.length + 1).toString().padStart(3, '0')}`,
+            password: 'password123',
+          });
           setAddStudentOpen(false);
       } else {
           toast({
@@ -123,6 +134,22 @@ export default function TeacherDashboard() {
                                 <FormMessage />
                             </FormItem>
                         )}/>
+                         <div className="grid grid-cols-2 gap-4">
+                            <FormField control={form.control} name="id" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Student ID</FormLabel>
+                                    <FormControl><Input placeholder="stu006" {...field} /></FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}/>
+                            <FormField control={form.control} name="password" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Password</FormLabel>
+                                    <FormControl><Input type="password" {...field} /></FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}/>
+                        </div>
                         <div className='grid grid-cols-3 gap-4'>
                         <FormField control={form.control} name="course" render={({ field }) => (
                             <FormItem className='col-span-2'>
@@ -196,3 +223,5 @@ export default function TeacherDashboard() {
     </div>
   );
 }
+
+    
