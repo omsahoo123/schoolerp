@@ -99,19 +99,6 @@ export default function LoginPage() {
             <div className='mt-4 text-center text-sm'>
               Don't have an account? <Link href="/admissions" className='underline'>Apply for admission</Link>
             </div>
-
-             <Alert className="mt-6 bg-secondary">
-                <Terminal className="h-4 w-4" />
-                <AlertTitle>Demo Credentials</AlertTitle>
-                <AlertDescription>
-                    <ul className="list-disc pl-5 text-sm">
-                        <li><b>Admin:</b> admin01</li>
-                        <li><b>Teacher:</b> prof001</li>
-                        <li><b>Student:</b> stu001</li>
-                    </ul>
-                    <p className="mt-2 text-sm">Password for all roles: <code className="font-bold">password123</code></p>
-                </AlertDescription>
-            </Alert>
           </CardContent>
         </Card>
       </div>
