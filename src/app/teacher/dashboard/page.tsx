@@ -29,7 +29,7 @@ const dashboardCards = [
     title: 'My Classes',
     description: 'View your assigned classes and student lists.',
     icon: Users,
-    link: '#',
+    link: '/teacher/classes',
     action: 'View Classes',
   },
   {
@@ -223,5 +223,3 @@ export default function TeacherDashboard() {
     </div>
   );
 }
-
-    

@@ -48,6 +48,7 @@ export function AppLayout({ user, children }: AppLayoutProps) {
       case 'teacher':
         return [
           { href: '/teacher/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+          { href: '/teacher/classes', label: 'My Classes', icon: Users },
           { href: '/teacher/attendance', label: 'Attendance', icon: CalendarCheck },
           { href: '/teacher/notes', label: 'Notes/Homework', icon: Notebook },
           { href: '/teacher/results', label: 'Results', icon: FileCheck },
