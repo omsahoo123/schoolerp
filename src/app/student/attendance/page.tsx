@@ -4,12 +4,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { getStudentAttendance } from '@/lib/db';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { getSession } from '@/lib/auth';
+import { protectPage } from '@/lib/auth';
 import type { Student } from '@/lib/types';
 import { AttendanceCalendar } from './AttendanceCalendar';
 
 export default async function StudentAttendancePage() {
-  const { user } = await getSession();
+  const user = await protectPage('student');
   const student = user as Student;
   const attendanceData = getStudentAttendance(student.id);
 
