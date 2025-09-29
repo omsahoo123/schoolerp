@@ -3,6 +3,7 @@ import {
   Book,
   CalendarCheck,
   CreditCard,
+  FileCheck,
   GraduationCap,
   Home,
   Hotel,
@@ -49,6 +50,7 @@ export function AppLayout({ user, children }: AppLayoutProps) {
           { href: '/teacher/dashboard', label: 'Dashboard', icon: LayoutDashboard },
           { href: '/teacher/attendance', label: 'Attendance', icon: CalendarCheck },
           { href: '/teacher/notes', label: 'Notes/Homework', icon: Notebook },
+          { href: '/teacher/results', label: 'Results', icon: FileCheck },
         ];
       case 'student':
         return [

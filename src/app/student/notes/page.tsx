@@ -1,4 +1,4 @@
-import { Book, Download, FileText, Type, Youtube, Link as LinkIcon, File, Video, FileInput } from 'lucide-react';
+import { Book, Download, FileText, Type, Youtube, Link as LinkIcon, File, Video, FileInput, Award } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +15,7 @@ const iconMap = {
   'YouTube Link': Youtube,
   'Zoom Link': Video,
   'Google Form': File,
+  'Result': Award,
 }
 
 export default async function StudentNotesPage() {

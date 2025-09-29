@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CalendarCheck, Users, Notebook, Video, PlusCircle, Loader } from 'lucide-react';
+import { CalendarCheck, Users, Notebook, Video, PlusCircle, Loader, FileCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -40,12 +40,12 @@ const dashboardCards = [
     action: 'Create Content',
   },
   {
-    title: 'Schedule Online Class',
-    description: 'Set up a new online lecture or discussion session.',
-    icon: Video,
-    link: '#',
-    action: 'Schedule Now',
-  },
+    title: 'Upload Results',
+    description: 'Upload semester or test results as a PDF.',
+    icon: FileCheck,
+    link: '/teacher/results',
+    action: 'Upload Now',
+  }
 ];
 
 const studentSchema = z.object({
