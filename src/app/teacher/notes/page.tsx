@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Upload } from 'lucide-react';
+import { Link2 } from 'lucide-react';
 import { addContent } from '@/app/actions';
 import { useRouter } from 'next/navigation';
 
@@ -21,6 +21,7 @@ const contentSchema = z.object({
   section: z.string({ required_error: 'Please select a section.' }),
   description: z.string().optional(),
   subject: z.string().min(2, 'Subject is too short'),
+  link: z.string().url({ message: 'Please enter a valid URL.' }).optional().or(z.literal('')),
 });
 
 export default function AddContentPage() {
@@ -32,6 +33,7 @@ export default function AddContentPage() {
       title: '',
       description: '',
       subject: '',
+      link: '',
     },
   });
 
@@ -43,6 +45,7 @@ export default function AddContentPage() {
       section: values.section,
       description: values.description,
       subject: values.subject,
+      link: values.link,
     });
     
     if (result.success) {
@@ -51,7 +54,7 @@ export default function AddContentPage() {
         description: `${values.contentType} "${values.title}" has been shared with the class.`,
       });
       form.reset();
-      router.refresh();
+      router.push('/student/notes');
     } else {
       toast({
         variant: 'destructive',
@@ -111,6 +114,10 @@ export default function AddContentPage() {
                         <SelectItem value="Homework">Homework</SelectItem>
                         <SelectItem value="Notes">Notes</SelectItem>
                         <SelectItem value="Test">Test</SelectItem>
+                        <SelectItem value="PDF">PDF</SelectItem>
+                        <SelectItem value="YouTube Link">YouTube Link</SelectItem>
+                        <SelectItem value="Zoom Link">Zoom Link</SelectItem>
+                        <SelectItem value="Google Form">Google Form</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -172,11 +179,22 @@ export default function AddContentPage() {
                 </FormItem>
               )}
             />
-            <div className="p-6 border-2 border-dashed rounded-lg text-center cursor-pointer hover:border-primary transition-colors">
-                <Upload className="mx-auto h-10 w-10 text-muted-foreground"/>
-                <p className="mt-2 text-sm text-muted-foreground">Click or drag file to this area to upload</p>
-                <Input type="file" className="sr-only" />
-            </div>
+            <FormField
+              control={form.control}
+              name="link"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Link (URL)</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Link2 className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input placeholder="https://example.com/..." className="pl-8" {...field} />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <Button type="submit" className="w-full">
               Add Content
             </Button>

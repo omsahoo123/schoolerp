@@ -60,5 +60,3 @@ export async function createStudent(studentData: Omit<Student, 'role' | 'avatarU
         return { success: false, error: 'Failed to add student.' };
     }
 }
-
-    

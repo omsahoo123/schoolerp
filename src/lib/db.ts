@@ -76,6 +76,7 @@ export type Note = {
   section: string;
   description?: string;
   file?: string;
+  link?: string;
 };
 
 export let notes: Note[] = [

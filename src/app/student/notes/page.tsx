@@ -1,20 +1,30 @@
-import { Book, Download, FileText, Type } from 'lucide-react';
+import { Book, Download, FileText, Type, Youtube, Link as LinkIcon, File, Video, FileInput } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { notes } from '@/lib/db';
 import { getSession } from '@/lib/auth';
 import type { Student } from '@/lib/types';
-import { File } from 'lucide-react';
+import Link from 'next/link';
 
 const iconMap = {
   Notes: FileText,
   Homework: Type,
   Test: File,
+  PDF: FileInput,
+  'YouTube Link': Youtube,
+  'Zoom Link': Video,
+  'Google Form': File,
 }
 
 export default async function StudentNotesPage() {
   const { user } = await getSession();
+
+  if (!user || user.role !== 'student') {
+    // Or redirect, or show an error message
+    return <p className="text-center text-muted-foreground py-8">You must be logged in as a student to view this page.</p>;
+  }
+
   const student = user as Student;
 
   const filteredNotes = notes.filter(note => note.class === student.course && note.section === student.section);
@@ -48,10 +58,19 @@ export default async function StudentNotesPage() {
                     </div>
                   </div>
                 </div>
-                <Button variant="ghost" size="icon" className="mt-2 md:mt-0">
-                  <Download className="h-5 w-5" />
-                  <span className="sr-only">Download</span>
-                </Button>
+                {note.link ? (
+                  <Button asChild variant="ghost" size="icon" className="mt-2 md:mt-0">
+                    <Link href={note.link} target="_blank" rel="noopener noreferrer">
+                      <LinkIcon className="h-5 w-5" />
+                      <span className="sr-only">Open Link</span>
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button variant="ghost" size="icon" className="mt-2 md:mt-0">
+                    <Download className="h-5 w-5" />
+                    <span className="sr-only">Download</span>
+                  </Button>
+                )}
               </div>
             )}) : (
               <p className="text-center text-muted-foreground py-8">No notes or homework found for your class.</p>
