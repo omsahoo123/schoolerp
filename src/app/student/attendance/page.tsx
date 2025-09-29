@@ -5,45 +5,23 @@ import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { getStudentAttendance, type StudentAttendance } from '@/lib/db';
+import { attendanceData } from '@/lib/data';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { getSession } from '@/lib/auth';
-import type { Student } from '@/lib/types';
-import { useEffect } from 'react';
 
-type StudentAttendancePageProps = {
-  initialAttendance: StudentAttendance;
-  user: Student;
-};
-
-
-function StudentAttendanceContent({ initialAttendance, user }: StudentAttendancePageProps) {
+export default function StudentAttendancePage() {
   const [month, setMonth] = useState<Date>(new Date());
-  const [attendance, setAttendance] = useState<StudentAttendance>(initialAttendance);
-  
-  useEffect(() => {
-    // If you need to refetch attendance for some reason, you can do it here.
-    // For now, we are using the server-fetched initial data.
-    setAttendance(initialAttendance);
-  }, [initialAttendance]);
-
 
   const presentDays: Date[] = [];
   const absentDays: Date[] = [];
   const holidayDays: Date[] = [];
 
-  Object.entries(attendance).forEach(([date, status]) => {
-    const d = new Date(date);
-    // Add timezone offset to avoid date shifting issues
-    d.setMinutes(d.getMinutes() + d.getTimezoneOffset());
-    if (d.toDateString() !== 'Invalid Date') {
-        if (status === 'present') presentDays.push(d);
-        else if (status === 'absent') absentDays.push(d);
-        else if (status === 'holiday') holidayDays.push(d);
-    }
+  Object.entries(attendanceData).forEach(([date, status]) => {
+    if (status === 'present') presentDays.push(new Date(date));
+    else if (status === 'absent') absentDays.push(new Date(date));
+    else if (status === 'holiday') holidayDays.push(new Date(date));
   });
-  
+
   const attendedDays = presentDays.length;
   const totalDays = presentDays.length + absentDays.length;
   const presentPercentage = totalDays > 0 ? Math.round((attendedDays / totalDays) * 100) : 0;
@@ -74,40 +52,11 @@ function StudentAttendanceContent({ initialAttendance, user }: StudentAttendance
                             absent: 'day-absent',
                             holiday: 'day-holiday',
                         }}
-                        styles={{
-                            day: {
-                                borderRadius: '9999px',
-                            }
-                        }}
                     />
                     <style>{`
-                        .day-present { 
-                            background-color: hsl(var(--primary)) !important; 
-                            color: hsl(var(--primary-foreground)) !important;
-                        }
-                        .day-present:hover {
-                            background-color: hsl(var(--primary) / 0.9) !important;
-                            color: hsl(var(--primary-foreground)) !important;
-                        }
-                        .day-absent { 
-                            background-color: hsl(var(--destructive)) !important; 
-                            color: hsl(var(--destructive-foreground)) !important; 
-                        }
-                         .day-absent:hover {
-                            background-color: hsl(var(--destructive) / 0.9) !important;
-                            color: hsl(var(--destructive-foreground)) !important;
-                        }
-                        .day-holiday { 
-                            background-color: hsl(var(--muted)) !important; 
-                            color: hsl(var(--muted-foreground)) !important;
-                        }
-                        .day-holiday:hover {
-                            background-color: hsl(var(--muted) / 0.9) !important;
-                            color: hsl(var(--muted-foreground)) !important;
-                        }
-                        .rdp-day_selected:not([disabled]):hover {
-                             background-color: inherit;
-                        }
+                        .day-present { background-color: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
+                        .day-absent { background-color: hsl(var(--destructive)); color: hsl(var(--destructive-foreground)); }
+                        .day-holiday { background-color: hsl(var(--muted)); color: hsl(var(--muted-foreground)); }
                     `}</style>
                 </CardContent>
             </Card>
@@ -150,17 +99,4 @@ function StudentAttendanceContent({ initialAttendance, user }: StudentAttendance
         </div>
     </div>
   );
-}
-
-export default async function StudentAttendancePage() {
-    const { user } = await getSession();
-    
-    if (!user || user.role !== 'student') {
-        // This case should be handled by the layout's protectPage, but as a fallback
-        return <div>You are not authorized to view this page.</div>;
-    }
-
-    const attendance = getStudentAttendance(user.id);
-
-    return <StudentAttendanceContent initialAttendance={attendance} user={user} />;
 }
