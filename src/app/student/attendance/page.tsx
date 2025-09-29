@@ -5,25 +5,48 @@ import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { attendanceData } from '@/lib/db';
+import { getStudentAttendance, type StudentAttendance } from '@/lib/db';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { getSession } from '@/lib/auth';
+import type { Student } from '@/lib/types';
+import { useEffect } from 'react';
 
 export default function StudentAttendancePage() {
   const [month, setMonth] = useState<Date>(new Date());
+  const [attendance, setAttendance] = useState<StudentAttendance>({});
+  const [user, setUser] = useState<Student | null>(null);
+
+  useEffect(() => {
+    async function fetchUser() {
+      const { user } = await getSession();
+      if (user && user.role === 'student') {
+        setUser(user);
+        setAttendance(getStudentAttendance(user.id));
+      }
+    }
+    fetchUser();
+  }, []);
 
   const presentDays: Date[] = [];
   const absentDays: Date[] = [];
   const holidayDays: Date[] = [];
 
-  Object.entries(attendanceData).forEach(([date, status]) => {
+  Object.entries(attendance).forEach(([date, status]) => {
     const d = new Date(date);
-    if (status === 'present') presentDays.push(d);
-    else if (status === 'absent') absentDays.push(d);
-    else if (status === 'holiday') holidayDays.push(d);
+    if (d.toDateString() !== 'Invalid Date') {
+        if (status === 'present') presentDays.push(d);
+        else if (status === 'absent') absentDays.push(d);
+        else if (status === 'holiday') holidayDays.push(d);
+    }
   });
   
-  const presentPercentage = Math.round((presentDays.length / (presentDays.length + absentDays.length)) * 100);
+  const totalAttended = presentDays.length + absentDays.length;
+  const presentPercentage = totalAttended > 0 ? Math.round((presentDays.length / totalAttended) * 100) : 0;
+
+  if (!user) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -59,28 +82,28 @@ export default function StudentAttendancePage() {
                     />
                     <style>{`
                         .day-present { 
-                            background-color: #2ecc71; 
-                            color: white;
+                            background-color: hsl(var(--primary)) !important; 
+                            color: hsl(var(--primary-foreground)) !important;
                         }
                         .day-present:hover {
-                            background-color: #27ae60 !important;
-                            color: white !important;
+                            background-color: hsl(var(--primary) / 0.9) !important;
+                            color: hsl(var(--primary-foreground)) !important;
                         }
                         .day-absent { 
-                            background-color: #e74c3c; 
-                            color: white; 
+                            background-color: hsl(var(--destructive)) !important; 
+                            color: hsl(var(--destructive-foreground)) !important; 
                         }
                          .day-absent:hover {
-                            background-color: #c0392b !important;
-                            color: white !important;
+                            background-color: hsl(var(--destructive) / 0.9) !important;
+                            color: hsl(var(--destructive-foreground)) !important;
                         }
                         .day-holiday { 
-                            background-color: #95a5a6; 
-                            color: white;
+                            background-color: hsl(var(--muted)) !important; 
+                            color: hsl(var(--muted-foreground)) !important;
                         }
                         .day-holiday:hover {
-                            background-color: #7f8c8d !important;
-                            color: white !important;
+                            background-color: hsl(var(--muted) / 0.9) !important;
+                            color: hsl(var(--muted-foreground)) !important;
                         }
                         .rdp-day_selected:not([disabled]):hover {
                              background-color: inherit;
@@ -109,7 +132,7 @@ export default function StudentAttendancePage() {
                         </div>
                          <div className='flex justify-between items-center pt-2 border-t'>
                             <span className="font-semibold">Percentage</span>
-                             <Badge className={cn(presentPercentage > 75 ? 'bg-primary' : 'bg-destructive')}>{presentPercentage}%</Badge>
+                             <Badge className={cn(presentPercentage >= 75 ? 'bg-primary' : 'bg-destructive')}>{presentPercentage}%</Badge>
                         </div>
                     </CardContent>
                 </Card>
@@ -118,9 +141,9 @@ export default function StudentAttendancePage() {
                         <CardTitle>Legend</CardTitle>
                     </CardHeader>
                     <CardContent className="flex flex-col gap-2">
-                        <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-[#2ecc71]"></div>Present</div>
-                        <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-[#e74c3c]"></div>Absent</div>
-                        <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-[#95a5a6]"></div>Holiday</div>
+                        <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-primary"></div>Present</div>
+                        <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-destructive"></div>Absent</div>
+                        <div className="flex items-center gap-2"><div className="w-4 h-4 rounded-full bg-muted"></div>Holiday</div>
                     </CardContent>
                 </Card>
             </div>

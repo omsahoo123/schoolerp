@@ -22,13 +22,34 @@ export let students: Student[] = [
 
 export let users: AuthenticatedUser[] = [...admins, ...teachers, ...students];
 
-export let attendanceData: Record<string, 'present' | 'absent' | 'holiday'> = {
+export type StudentAttendance = Record<string, 'present' | 'absent' | 'holiday'>;
+type AllAttendance = Record<string, StudentAttendance>; // studentId -> StudentAttendance
+
+const initialAttendance: AllAttendance = {
+    'stu001': {
+        '2024-07-01': 'present', '2024-07-02': 'present', '2024-07-03': 'absent',
+        '2024-07-04': 'present', '2024-07-05': 'present', '2024-07-06': 'holiday',
+        '2024-07-07': 'holiday', '2024-07-08': 'present', '2024-07-09': 'present',
+        '2024-07-10': 'present', '2024-07-11': 'absent', '2024-07-12': 'present',
+        '2024-07-15': 'present', '2024-07-16': 'present',
+    },
+    'stu002': {},
+    'stu003': {},
+    'stu004': {},
+    'stu005': {},
+};
+
+let attendanceData: AllAttendance = initialAttendance;
+
+// Deprecated global attendance. Keeping for backwards compatibility with old student page if needed, but should be removed.
+export let globalAttendanceData: Record<string, 'present' | 'absent' | 'holiday'> = {
   '2024-07-01': 'present', '2024-07-02': 'present', '2024-07-03': 'absent',
   '2024-07-04': 'present', '2024-07-05': 'present', '2024-07-06': 'holiday',
   '2024-07-07': 'holiday', '2024-07-08': 'present', '2024-07-09': 'present',
   '2024-07-10': 'present', '2024-07-11': 'absent', '2024-07-12': 'present',
   '2024-07-15': 'present', '2024-07-16': 'present',
 };
+
 
 export const feeData = {
   totalFees: 5000,
@@ -76,10 +97,16 @@ export function addNote(note: Omit<Note, 'id' | 'date'>) {
 }
 
 export function saveAttendance(date: string, studentId: string, status: 'present' | 'absent') {
-    // This is a simplified example. For a real app, you'd store attendance per student, per course.
-    // For now, we'll just update a single student's record. This will affect all students viewing attendance.
-    attendanceData[date] = status;
+    if (!attendanceData[studentId]) {
+        attendanceData[studentId] = {};
+    }
+    attendanceData[studentId][date] = status;
 }
+
+export function getStudentAttendance(studentId: string): StudentAttendance {
+    return attendanceData[studentId] || {};
+}
+
 
 export function addStudent(studentData: Omit<Student, 'role' | 'avatarUrl'>) {
     const newStudent: Student = {
@@ -89,7 +116,8 @@ export function addStudent(studentData: Omit<Student, 'role' | 'avatarUrl'>) {
     };
     students.push(newStudent);
     users.push(newStudent);
+    if (!attendanceData[newStudent.id]) {
+      attendanceData[newStudent.id] = {};
+    }
     return newStudent;
 }
-
-    
