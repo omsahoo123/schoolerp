@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { notes } from '@/lib/db';
-import { getSession } from '@/lib/auth';
+import { protectPage } from '@/lib/auth';
 import type { Student } from '@/lib/types';
 import { File } from 'lucide-react';
 
@@ -14,7 +14,7 @@ const iconMap = {
 }
 
 export default async function StudentNotesPage() {
-  const { user } = await getSession();
+  const user = await protectPage('student');
   const student = user as Student;
 
   const filteredNotes = notes.filter(note => note.class === student.course && note.section === student.section);
