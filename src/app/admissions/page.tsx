@@ -51,7 +51,7 @@ export default function AdmissionsPage() {
       <Card className="w-full max-w-2xl shadow-2xl">
         <CardHeader>
            <div className="flex items-center justify-between">
-              <Link href="/login" className='flex items-center gap-2 text-sm hover:text-primary transition-colors'>
+              <Link href="/login" className='flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors'>
                 <ArrowLeft className="h-4 w-4" />
                 Back to Login
               </Link>

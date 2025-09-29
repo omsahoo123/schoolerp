@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useFormState, useFormStatus } from 'react-dom';
-import { redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,14 +15,17 @@ import type { UserRole } from '@/lib/types';
 import { Logo } from '@/components/icons/logo';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
+import Link from 'next/link';
 
 type State = {
   success: boolean;
   message: string;
+  role?: UserRole;
 } | undefined;
 
 export default function LoginPage() {
   const { toast } = useToast();
+  const router = useRouter();
   
   const [role, setRole] = useState<UserRole | ''>('');
   
@@ -39,7 +42,8 @@ export default function LoginPage() {
         title: 'Login Successful',
         description: `Welcome back, ${result.user.name}!`,
       });
-      redirect(`/${result.user.role}/dashboard`);
+      router.push(`/${result.user.role}/dashboard`);
+      return { success: true, message: 'Login successful', role: result.user.role };
     } else {
       return { success: false, message: result.message };
     }
@@ -92,6 +96,9 @@ export default function LoginPage() {
 
               <SubmitButton />
             </form>
+            <div className='mt-4 text-center text-sm'>
+              Don't have an account? <Link href="/admissions" className='underline'>Apply for admission</Link>
+            </div>
 
              <Alert className="mt-6 bg-secondary">
                 <Terminal className="h-4 w-4" />
